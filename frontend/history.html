@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alert History — SheShield</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  
+</head>
+<body>
+
+<div class="app">
+  
+<aside class="sidebar">
+  <div class="logo">She<span>Shield</span></div>
+  <div class="profile-mini">
+    <div class="avatar">P</div>
+    <div>
+      <strong>Priya Sharma</strong>
+      <small>priya@example.com</small>
+      <div class="status-live">SAFE · Active</div>
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-title">Main</div>
+    <a class="nav-item " href="dashboard.html">🏠 Dashboard</a>
+    <a class="nav-item " href="contacts.html">👥 Trusted Contacts <span class="nav-badge">4</span></a>
+    <a class="nav-item " href="sos.html">🆘 SOS Emergency</a>
+    <a class="nav-item active" href="history.html">📋 Alert History</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-title">Account</div>
+    <a class="nav-item " href="profile.html">👤 My Profile</a>
+    <a class="nav-item" href="index.html">🚪 Sign Out</a>
+  </div>
+
+  <div class="sidebar-footer">
+    <button class="btn btn-primary btn-block" onclick="triggerSOS()">Emergency SOS</button>
+  </div>
+</aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title">
+        <h1>Alert History</h1>
+        <p>Complete log of emergency activity and escalation records</p>
+      </div>
+      <div class="top-actions">
+        <div class="pill">📍 Chennai, Tamil Nadu · Live</div>
+        <div class="notification">🔔</div>
+      </div>
+    </div>
+    <div class="content">
+      
+<div class="search-box"><input placeholder="Search by location or date"></div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Date & Time</th>
+        <th>Location</th>
+        <th>Contacts</th>
+        <th>Layers</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Mar 9, 2026</strong><br><small>11:20 AM</small></td><td>Anna Nagar, Chennai</td><td>0</td><td><div class="levels"><i class="on"></i><i></i><i></i><i></i></div></td><td><span class="status cancelled">Cancelled</span></td></tr>
+      <tr><td><strong>Feb 28, 2026</strong><br><small>9:45 PM</small></td><td>T. Nagar, Chennai</td><td>2</td><td><div class="levels"><i class="on"></i><i class="on"></i><i></i><i></i></div></td><td><span class="status resolved">Resolved</span></td></tr>
+      <tr><td><strong>Feb 15, 2026</strong><br><small>7:30 PM</small></td><td>Velachery, Chennai</td><td>4</td><td><div class="levels"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div></td><td><span class="status sent">Full Alert</span></td></tr>
+      <tr><td><strong>Jan 22, 2026</strong><br><small>10:15 PM</small></td><td>Adyar, Chennai</td><td>1</td><td><div class="levels"><i class="on"></i><i></i><i></i><i></i></div></td><td><span class="status resolved">Resolved</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+    </div>
+  </main>
+</div>
+
+<div class="alert-overlay" id="alertOverlay">
+  <div style="font-size:72px">🚨</div>
+  <h2>Alert Sent</h2>
+  <p>Your live location has been prepared for emergency escalation.</p>
+  <div class="count-box">
+    <div class="count-num" id="countNum">10</div>
+    <div>Tap cancel to stop the emergency alert before full escalation.</div>
+  </div>
+  <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap">
+    <button class="btn btn-outline" onclick="cancelAlert()">Cancel Alert</button>
+    <button class="btn btn-soft">Layer 1 Active</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Action completed</div>
+<script src="js/app.js"></script>
+</body>
+</html>
