@@ -84,38 +84,50 @@ window.initMap = function initMap() {
 };
 
 function startWatchingLocation() {
-  if (!navigator.geolocation) {
-    $("#scoreLabel").textContent = "Location not supported on this device";
-    return;
-  }
-
-  navigator.geolocation.watchPosition(
-    (pos) => {
-      if (!inIndia(pos.coords.latitude, pos.coords.longitude)) {
+  mapState.stopWatch = watchLocation(
+    (point) => {
+      if (!inIndia(point.lat, point.lng)) {
         $("#scoreLabel").textContent = "SheShield's map currently covers India only";
         $("#scoreSub").textContent = "Your location is outside India";
         return;
       }
-      const first = !mapState.me;
-      mapState.me = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
-      drawMe();
-      if (first && !mapState.centeredOnce) {
-        mapState.centeredOnce = true;
-        mapState.map.setView([mapState.me.lat, mapState.me.lng], 15);
-        updateAreaScore();
-      }
+      $("#manualLocBtn").hidden = true;
+      setMyLocation(point, false);
     },
     (err) => {
-      const help = {
-        1: ["Location access is blocked", "Click the icon left of the address bar → Site settings → Location → Allow, then reload."],
-        2: ["Your device can't find its location", "On Windows: Settings → Privacy & security → Location → turn on Location services. On a phone, turn on GPS."],
-        3: ["Finding your location took too long", "Move near a window or check your connection, then reload."],
-      }[err.code] || ["Turn on location to see your area's score", ""];
-      $("#scoreLabel").textContent = help[0];
-      $("#scoreSub").textContent = `${help[1]} You can still tap anywhere on the map to check a place.`;
-    },
-    { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
+      const [title, help] = LOCATION_HELP[err.code] || LOCATION_HELP[2];
+      $("#scoreLabel").textContent = title;
+      $("#scoreSub").textContent = help;
+      $("#manualLocBtn").hidden = false;
+    }
   );
+}
+
+function setMyLocation(point, manual) {
+  const first = !mapState.me;
+  mapState.me = { ...point, manual };
+  drawMe();
+  if (manual || (first && !mapState.centeredOnce)) {
+    mapState.centeredOnce = true;
+    mapState.map.setView([point.lat, point.lng], 15);
+    updateAreaScore();
+  }
+}
+
+// Fallback when the device can't locate itself: tap the map to say where you are.
+function startPickMe() {
+  cancelReportMode();
+  mapState.pickingMe = true;
+  $("#mapHint").hidden = false;
+  $("#mapHint").innerHTML = 'Tap the map where you are · <button onclick="cancelPickMe()">Cancel</button>';
+  $("#map").classList.add("picking");
+  document.querySelector(".map-stage").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function cancelPickMe() {
+  mapState.pickingMe = false;
+  $("#mapHint").hidden = true;
+  $("#map").classList.remove("picking");
 }
 
 function drawMe() {
@@ -126,7 +138,7 @@ function drawMe() {
       zIndexOffset: 1000,
     })
       .addTo(mapState.map)
-      .bindTooltip("You are here");
+      .bindTooltip(mapState.me.manual ? "You said you are here" : "You are here");
     mapState.accuracyCircle = L.circle([lat, lng], {
       radius: accuracy,
       color: "#3b82f6",
@@ -316,6 +328,14 @@ async function submitReport(event) {
 async function onMapClick(e) {
   const { lat, lng } = e.latlng;
   if (!inIndia(lat, lng)) return showToast("SheShield currently covers India only");
+  if (mapState.pickingMe) {
+    cancelPickMe();
+    if (mapState.stopWatch) mapState.stopWatch();
+    setMyLocation({ lat, lng, accuracy: 50 }, true);
+    $("#manualLocBtn").hidden = true;
+    $("#locationPill").textContent = "📍 Set manually";
+    return showToast("Location set. Live SOS tracking still needs your device's location.");
+  }
   if (mapState.reportMode) return openReportForm(lat, lng);
 
   const popup = L.popup().setLatLng(e.latlng).setContent('<div class="score-popup">Checking safety…</div>').openOn(mapState.map);

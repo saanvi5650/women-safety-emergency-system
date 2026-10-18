@@ -153,16 +153,78 @@ function greeting() {
 
 /* ---------- Location ---------- */
 
-function getPosition(timeout = 10000) {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) return reject(new Error("Geolocation is not supported on this device"));
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) }),
-      (err) => reject(err),
-      { enableHighAccuracy: true, timeout, maximumAge: 30000 }
-    );
-  });
+const toPoint = (pos) => ({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) });
+
+// Browsers only allow location on https:// or localhost. Code 4 is our own "insecure page" error.
+function locationUnsupportedError() {
+  if (!navigator.geolocation) return Object.assign(new Error("Geolocation is not supported on this device"), { code: 2 });
+  if (!window.isSecureContext) return Object.assign(new Error("Location needs https:// or localhost"), { code: 4 });
+  return null;
 }
+
+function requestPosition(highAccuracy, timeout) {
+  return new Promise((resolve, reject) =>
+    navigator.geolocation.getCurrentPosition((pos) => resolve(toPoint(pos)), reject, {
+      enableHighAccuracy: highAccuracy,
+      timeout,
+      maximumAge: highAccuracy ? 30000 : 300000,
+    })
+  );
+}
+
+// Tries GPS first; laptops and desktops without GPS often fail or time out on a
+// high-accuracy request, so fall back to Wi-Fi/network location.
+async function getPosition(timeout = 10000) {
+  const unsupported = locationUnsupportedError();
+  if (unsupported) throw unsupported;
+  try {
+    return await requestPosition(true, timeout);
+  } catch (err) {
+    if (err.code === 1) throw err; // permission denied: retrying won't help
+    return requestPosition(false, 15000);
+  }
+}
+
+// Continuous version of getPosition with the same GPS -> network fallback.
+// Returns a function that stops watching.
+function watchLocation(onPoint, onError) {
+  const unsupported = locationUnsupportedError();
+  if (unsupported) {
+    onError(unsupported);
+    return () => {};
+  }
+
+  let id = null;
+  let gotFix = false;
+  let fellBack = false;
+  const start = (highAccuracy) =>
+    navigator.geolocation.watchPosition(
+      (pos) => {
+        gotFix = true;
+        onPoint(toPoint(pos));
+      },
+      (err) => {
+        if (err.code !== 1 && highAccuracy && !fellBack) {
+          fellBack = true;
+          navigator.geolocation.clearWatch(id);
+          id = start(false);
+          return;
+        }
+        if (!gotFix || err.code === 1) onError(err);
+      },
+      { enableHighAccuracy: highAccuracy, maximumAge: highAccuracy ? 5000 : 60000, timeout: highAccuracy ? 15000 : 30000 }
+    );
+
+  id = start(true);
+  return () => navigator.geolocation.clearWatch(id);
+}
+
+const LOCATION_HELP = {
+  1: ["Location access is blocked", "Click the icon left of the address bar → Site settings → Location → Allow, then reload."],
+  2: ["Your device can't find its location", "On Windows: Settings → Privacy & security → Location → turn on Location services (and “Let apps access your location”). Connect to Wi-Fi if you're on a wired connection. On a phone, turn on GPS."],
+  3: ["Finding your location took too long", "Check that Location services are on and you're connected to Wi-Fi, then reload."],
+  4: ["Location needs a secure page", "Open the app at http://localhost:5000 on this computer, or use an https:// link (e.g. ngrok) on your phone."],
+};
 
 // Human-readable place name via OpenStreetMap Nominatim (cached per session).
 async function reverseGeocode(lat, lng) {
@@ -203,9 +265,10 @@ async function updateLocationPill() {
       .then((label) => (pill.textContent = `📍 ${label} · Live`))
       .catch(() => {});
     return pos;
-  } catch {
-    pill.textContent = "📍 Location off";
-    pill.title = "Allow location access so SheShield can share where you are during an SOS";
+  } catch (err) {
+    const [title, help] = LOCATION_HELP[err.code] || LOCATION_HELP[2];
+    pill.textContent = err.code === 1 ? "📍 Location blocked" : "📍 Location unavailable";
+    pill.title = `${title}. ${help}`;
     return null;
   }
 }
@@ -303,7 +366,7 @@ function renderSosOverlay() {
 const sos = {
   timer: null,
   alert: null,
-  watchId: null,
+  stopWatch: null,
   poll: null,
   lastSentAt: 0,
   lastPoint: null,
@@ -437,31 +500,30 @@ async function refreshActiveAlert() {
 }
 
 function startLiveTracking() {
-  if (!navigator.geolocation || sos.watchId !== null) return;
+  if (sos.stopWatch) return;
   if (getUser()?.settings?.shareLiveLocation === false) {
     $("#sosLocationStatus").textContent = "Live location sharing is turned off in your profile.";
     return;
   }
 
-  sos.watchId = navigator.geolocation.watchPosition(
-    (pos) => {
-      const point = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) };
+  sos.stopWatch = watchLocation(
+    (point) => {
       sos.lastPoint = point;
       $("#sosLocationStatus").textContent = `📍 Sharing live location (±${point.accuracy} m) · updated ${formatTime(new Date())}`;
       if (Date.now() - sos.lastSentAt < 10000 || !sos.alert) return;
       sos.lastSentAt = Date.now();
       api(`/api/sos/${sos.alert.id}/location`, { method: "POST", body: point }).catch(() => {});
     },
-    () => {
-      $("#sosLocationStatus").textContent = "⚠️ Location unavailable. Turn on GPS and allow location access.";
-    },
-    { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
+    (err) => {
+      const [title, help] = LOCATION_HELP[err.code] || LOCATION_HELP[2];
+      $("#sosLocationStatus").textContent = `⚠️ ${title}. ${help}`;
+    }
   );
 }
 
 function stopSOS() {
-  if (sos.watchId !== null) navigator.geolocation.clearWatch(sos.watchId);
-  sos.watchId = null;
+  if (sos.stopWatch) sos.stopWatch();
+  sos.stopWatch = null;
   clearInterval(sos.poll);
   sos.alert = null;
   $("#alertOverlay")?.classList.remove("show");
