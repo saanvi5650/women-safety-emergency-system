@@ -1,6 +1,6 @@
 /* SheShield Safety Map: live location, community danger reports, nearby help and safest routes.
    Uses free OpenStreetMap services, so no API keys are needed:
-   - Tiles: CARTO Voyager (OSM data)
+   - Tiles: OpenStreetMap
    - Places: Nominatim (search) and Overpass (police stations, hospitals)
    - Routing: FOSSGIS OSRM (routing.openstreetmap.de) */
 
@@ -17,7 +17,6 @@ const CATEGORY_META = {
 const SEVERITY_COLOR = { 1: "#f59e0b", 2: "#f97316", 3: "#dc2626" };
 const SEVERITY_LABEL = { 1: "Low", 2: "Medium", 3: "High" };
 const POI_META = { police: ["🚓", "Police station"], hospital: ["🏥", "Hospital"] };
-const DEFAULT_CENTER = [13.0827, 80.2707]; // Chennai, until we know where the user is
 const ROUTE_BUFFER_M = 120;
 
 const mapState = {
@@ -59,15 +58,12 @@ window.initMap = function initMap() {
     return;
   }
 
-  const map = L.map("map", { zoomControl: false }).setView(DEFAULT_CENTER, 13);
+  // Keep the map within India for now.
+  const bounds = L.latLngBounds([INDIA_BOUNDS.south, INDIA_BOUNDS.west], [INDIA_BOUNDS.north, INDIA_BOUNDS.east]);
+  const map = L.map("map", { zoomControl: false, maxBounds: bounds.pad(0.05), maxBoundsViscosity: 1, minZoom: 4 }).setView(INDIA_CENTER, 5);
   mapState.map = map;
   L.control.zoom({ position: "bottomright" }).addTo(map);
-
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-    maxZoom: 19,
-    subdomains: "abcd",
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-  }).addTo(map);
+  addBaseTiles(map);
 
   mapState.reportLayer = L.layerGroup().addTo(map);
   mapState.poiLayer = L.layerGroup().addTo(map);
@@ -95,6 +91,11 @@ function startWatchingLocation() {
 
   navigator.geolocation.watchPosition(
     (pos) => {
+      if (!inIndia(pos.coords.latitude, pos.coords.longitude)) {
+        $("#scoreLabel").textContent = "SheShield's map currently covers India only";
+        $("#scoreSub").textContent = "Your location is outside India";
+        return;
+      }
       const first = !mapState.me;
       mapState.me = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
       drawMe();
@@ -104,9 +105,14 @@ function startWatchingLocation() {
         updateAreaScore();
       }
     },
-    () => {
-      $("#scoreLabel").textContent = "Turn on location to see your area's score";
-      $("#scoreSub").textContent = "Tap anywhere on the map to check a place instead";
+    (err) => {
+      const help = {
+        1: ["Location access is blocked", "Click the icon left of the address bar → Site settings → Location → Allow, then reload."],
+        2: ["Your device can't find its location", "On Windows: Settings → Privacy & security → Location → turn on Location services. On a phone, turn on GPS."],
+        3: ["Finding your location took too long", "Move near a window or check your connection, then reload."],
+      }[err.code] || ["Turn on location to see your area's score", ""];
+      $("#scoreLabel").textContent = help[0];
+      $("#scoreSub").textContent = `${help[1]} You can still tap anywhere on the map to check a place.`;
     },
     { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
   );
@@ -309,6 +315,7 @@ async function submitReport(event) {
 
 async function onMapClick(e) {
   const { lat, lng } = e.latlng;
+  if (!inIndia(lat, lng)) return showToast("SheShield currently covers India only");
   if (mapState.reportMode) return openReportForm(lat, lng);
 
   const popup = L.popup().setLatLng(e.latlng).setContent('<div class="score-popup">Checking safety…</div>').openOn(mapState.map);
@@ -443,12 +450,12 @@ async function searchDestination(event) {
   const viewbox = `${c.lng - d},${c.lat + d},${c.lng + d},${c.lat - d}`;
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&q=${encodeURIComponent(q)}&viewbox=${viewbox}`,
+      `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=in&q=${encodeURIComponent(q)}&viewbox=${viewbox}`,
       { headers: { "Accept-Language": navigator.language || "en" } }
     );
     const results = await res.json();
     if (!results.length) {
-      box.innerHTML = '<p class="muted small">No places found. Try adding the area or city name.</p>';
+      box.innerHTML = '<p class="muted small">No places found in India. Try adding the area or city name.</p>';
       return;
     }
     box.innerHTML = results
@@ -526,6 +533,7 @@ async function planRoutes() {
   const origin = mapState.me || mapState.map.getCenter();
   if (!mapState.me) showToast("Location unavailable: routing from the map centre");
 
+  if (!inIndia(origin.lat, origin.lng)) return showToast("Routing is available within India only", "error");
   const mode = $('input[name="mode"]:checked').value;
   const results = $("#routeResults");
   results.innerHTML = '<p class="muted small">Finding routes and checking them for reported dangers…</p>';

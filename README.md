@@ -18,7 +18,9 @@ and a community safety map with safest-route planning.
 | 📞 **Fake call & shake-to-SOS** | Escape uncomfortable situations; shake your phone to start an SOS while the app is open. |
 | 📋 **Alert history** | Who was alerted, through which channel, and who responded. |
 
-Maps use free OpenStreetMap services (CARTO tiles, Nominatim, Overpass, OSRM), so **no API keys are needed**.
+Maps use free, open-source OpenStreetMap services (OSM tiles, Nominatim, Overpass, OSRM), so **no API keys are needed**.
+The app currently serves **India only**. See **[docs/MAPS.md](docs/MAPS.md)** for tile options, India's boundaries,
+and how to show real danger data.
 
 ## Quick start
 
@@ -67,6 +69,7 @@ frontend/
   js/track.js            Public live-tracking page for contacts
 docs/
   SOS_SETUP.md           Email/SMS/phone alert setup
+  MAPS.md                Map tiles, India restriction, real danger data sources
   COMPETITOR_RESEARCH.md Market research and roadmap
 ```
 

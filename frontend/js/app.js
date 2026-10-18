@@ -9,6 +9,30 @@ const API_BASE =
   (location.protocol === "file:" || DEV_PORTS.includes(location.port) ? "http://localhost:5000" : "");
 const APP_ORIGIN = API_BASE || location.origin;
 
+/* ---------- Map config (shared by the Safety Map and the tracking page) ---------- */
+
+// OpenStreetMap's own raster tiles: open data, free, no API key. Fine for a
+// project of this size; see docs/MAPS.md before running at high traffic.
+const MAP_TILES = {
+  url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+  options: {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  },
+};
+
+// SheShield currently serves India only. Rough bounding box of India
+// (the box also clips small parts of neighbouring countries).
+const INDIA_BOUNDS = { south: 6.0, west: 67.5, north: 37.5, east: 98.0 };
+const INDIA_CENTER = [22.5, 79.0];
+
+const inIndia = (lat, lng) =>
+  lat >= INDIA_BOUNDS.south && lat <= INDIA_BOUNDS.north && lng >= INDIA_BOUNDS.west && lng <= INDIA_BOUNDS.east;
+
+function addBaseTiles(map) {
+  return L.tileLayer(MAP_TILES.url, MAP_TILES.options).addTo(map);
+}
+
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 

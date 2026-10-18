@@ -72,11 +72,7 @@ function drawLocation(loc, path) {
   if (typeof L === "undefined") return;
   if (!track.map) {
     track.map = L.map("trackMap").setView([loc.lat, loc.lng], 16);
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-      maxZoom: 19,
-      subdomains: "abcd",
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    }).addTo(track.map);
+    addBaseTiles(track.map);
     track.path = L.polyline([], { color: "#e65278", weight: 4, opacity: 0.7 }).addTo(track.map);
     track.marker = L.marker([loc.lat, loc.lng], {
       icon: L.divIcon({ className: "sos-marker", html: "<span></span>", iconSize: [26, 26] }),

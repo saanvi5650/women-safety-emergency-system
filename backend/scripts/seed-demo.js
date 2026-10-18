@@ -10,6 +10,7 @@ require("dotenv").config({ path: path.join(__dirname, "..", ".env"), quiet: true
 const mongoose = require("mongoose");
 const Report = require("../models/report");
 const User = require("../models/user");
+const { inServiceArea } = require("../config/region");
 
 const SAMPLES = [
   ["poor_lighting", 2, "Street lights not working along this stretch after 8 PM"],
@@ -34,6 +35,10 @@ const run = async () => {
   }
 
   const [lat = 13.0827, lng = 80.2707] = process.argv.slice(2).map(Number);
+  if (!inServiceArea(lat, lng)) {
+    console.error("Demo data can only be added inside India.");
+    return mongoose.disconnect();
+  }
   const owner = await User.findOne();
   if (!owner) {
     console.error("Create an account first, then run the seed again.");

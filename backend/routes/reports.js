@@ -4,6 +4,7 @@ const rateLimit = require("express-rate-limit");
 const Report = require("../models/report");
 const requireAuth = require("../middleware/auth");
 const { CATEGORIES } = require("../models/report");
+const { inServiceArea } = require("../config/region");
 
 const router = express.Router();
 
@@ -127,6 +128,9 @@ router.post("/", reportLimiter, async (req, res) => {
   try {
     const point = parseLatLng(req.body || {});
     if (!point) return res.status(400).json({ message: "Invalid coordinates" });
+    if (!inServiceArea(point.lat, point.lng)) {
+      return res.status(400).json({ message: "SheShield currently accepts reports from India only" });
+    }
 
     const { category, description } = req.body;
     if (!CATEGORIES.includes(category)) {

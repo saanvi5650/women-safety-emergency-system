@@ -56,6 +56,10 @@ test("input validation runs before touching the database", async () => {
   const badCategory = await request(app).post("/api/reports").set(auth).send({ lat: 13, lng: 80, category: "x" });
   assert.strictEqual(badCategory.status, 400);
 
+  const outsideIndia = await request(app).post("/api/reports").set(auth).send({ lat: 51.5, lng: -0.12, category: "theft" });
+  assert.strictEqual(outsideIndia.status, 400);
+  assert.match(outsideIndia.body.message, /India/);
+
   const badLocation = await request(app).post("/api/sos/64b7f0c2a1b2c3d4e5f60718/location").set(auth).send({ lat: "x" });
   assert.strictEqual(badLocation.status, 400);
 });
