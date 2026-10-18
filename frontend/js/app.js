@@ -259,7 +259,10 @@ async function updateLocationPill() {
   if (!pill) return null;
   pill.textContent = "📍 Locating…";
   try {
-    const pos = await getPosition();
+    const pos = await Promise.race([
+      getPosition(),
+      new Promise((_, reject) => setTimeout(() => reject(Object.assign(new Error("No response"), { code: 3 })), 30000)),
+    ]);
     pill.textContent = `📍 ${pos.lat.toFixed(4)}, ${pos.lng.toFixed(4)} · Live`;
     reverseGeocode(pos.lat, pos.lng)
       .then((label) => (pill.textContent = `📍 ${label} · Live`))

@@ -83,7 +83,21 @@ window.initMap = function initMap() {
   onMapMoved();
 };
 
+const STILL_LOCATING_HELP =
+  "If Chrome shows a location icon or prompt in the address bar, click it and choose Allow. " +
+  "Also check Windows Settings → Privacy & security → Location (Location services and “Let desktop apps access your location” on). " +
+  "Or set your location manually.";
+
 function startWatchingLocation() {
+  // Browsers can wait forever (e.g. on an unanswered permission prompt) without
+  // calling either callback, so don't leave the user staring at "Checking…".
+  setTimeout(() => {
+    if (mapState.me) return;
+    $("#scoreLabel").textContent = "Still looking for your location…";
+    $("#scoreSub").textContent = STILL_LOCATING_HELP;
+    $("#manualLocBtn").hidden = false;
+  }, 12000);
+
   mapState.stopWatch = watchLocation(
     (point) => {
       if (!inIndia(point.lat, point.lng)) {
@@ -112,6 +126,8 @@ function setMyLocation(point, manual) {
     mapState.map.setView([point.lat, point.lng], 15);
     updateAreaScore();
   }
+  // A destination was chosen while we were waiting for a starting point.
+  if (manual && mapState.destination && !mapState.routes.length) planRoutes();
 }
 
 // Fallback when the device can't locate itself: tap the map to say where you are.
@@ -550,18 +566,32 @@ function riskLabel(risk) {
 
 async function planRoutes() {
   const dest = mapState.destination;
-  const origin = mapState.me || mapState.map.getCenter();
-  if (!mapState.me) showToast("Location unavailable: routing from the map centre");
-
-  if (!inIndia(origin.lat, origin.lng)) return showToast("Routing is available within India only", "error");
-  const mode = $('input[name="mode"]:checked').value;
+  const origin = mapState.me;
   const results = $("#routeResults");
+
+  // Routing from a guessed point (like the middle of India) gives useless results.
+  if (!origin) {
+    results.innerHTML = '<p class="muted small">We need your starting point first. Allow location access, or set it manually.</p>';
+    $("#manualLocBtn").hidden = false;
+    return startPickMe();
+  }
+
+  const mode = $('input[name="mode"]:checked').value;
+  const km = distanceM(origin, dest) / 1000;
+  if (mode === "foot" && km > 40) {
+    results.innerHTML = `<p class="muted small">That's about ${Math.round(km)} km away, too far to walk. Switch to 🚗 Drive.</p>`;
+    return;
+  }
+
   results.innerHTML = '<p class="muted small">Finding routes and checking them for reported dangers…</p>';
   mapState.routeLayer.clearLayers();
 
   try {
     const url = `https://routing.openstreetmap.de/routed-${mode}/route/v1/driving/${origin.lng},${origin.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson&alternatives=3`;
-    const res = await fetch(url);
+    // The free routing server can be slow; don't leave the spinner forever.
+    const res = await fetch(url, { signal: AbortSignal.timeout(20000) }).catch((err) => {
+      throw new Error(err.name === "TimeoutError" ? "the routing server took too long, please try again" : "the routing server is unreachable");
+    });
     const data = await res.json();
     if (data.code !== "Ok" || !data.routes?.length) throw new Error("No route found");
 
