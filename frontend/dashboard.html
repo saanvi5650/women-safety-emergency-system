@@ -3,101 +3,92 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#e65278" />
   <title>Dashboard — SheShield</title>
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
+<body data-page="dashboard">
 
 <div class="app">
-  
-<aside class="sidebar">
-  <div class="logo">She<span>Shield</span></div>
-  <div class="profile-mini">
-    <div class="avatar">P</div>
-    <div>
-      <span id="sidebarUserName">User Name</span>
-      <small id="sidebarUserEmail">user@example.com</small>
-      <div class="status-live">SAFE · Active</div>
-    </div>
-  </div>
-
-  <div class="nav-group">
-    <div class="nav-title">Main</div>
-    <a class="nav-item active" href="dashboard.html">🏠 Dashboard</a>
-    <a class="nav-item" href="contacts.html">👥 Trusted Contacts <span class="nav-badge">4</span></a>
-    <a class="nav-item" href="sos.html">🆘 SOS Emergency</a>
-    <a class="nav-item" href="history.html">📋 Alert History</a>
-  </div>
-
-  <div class="nav-group">
-    <div class="nav-title">Account</div>
-    <a class="nav-item" href="profile.html">👤 My Profile</a>
-    <a class="nav-item" href="index.html">🚪 Sign Out</a>
-  </div>
-
-  <div class="sidebar-footer">
-    <button class="btn btn-primary btn-block" onclick="triggerSOS()">Emergency SOS</button>
-  </div>
-</aside>
+  <aside class="sidebar"></aside>
 
   <main class="main">
     <div class="topbar">
       <div class="page-title">
         <h1>Dashboard</h1>
-        <p>Tuesday, March 10, 2026</p>
+        <p id="todayDate"></p>
       </div>
       <div class="top-actions">
-        <div class="pill">📍 Chennai, Tamil Nadu · Live</div>
-        <div class="notification">🔔</div>
+        <div class="pill" id="locationPill">📍 Locating…</div>
+        <a class="notification" href="tel:112" title="Call 112 emergency">📞</a>
       </div>
     </div>
 
     <div class="content">
-      
+
       <section class="banner">
         <div>
-          <h3 id="welcomeUser">Good Evening, User 👋</h3>
-          <p>Your trusted emergency network is active and the adaptive response system is ready.</p>
+          <h3 id="welcomeUser">Welcome 👋</h3>
+          <p>Your trusted network is on standby. One tap alerts them with your live location.</p>
           <div class="state-safe">SAFE STATUS ENABLED</div>
         </div>
-        <button class="btn btn-primary" onclick="triggerSOS()">Trigger Emergency</button>
+        <button class="btn btn-primary" onclick="triggerSOS()">🚨 Trigger Emergency</button>
       </section>
 
       <section class="cards-4">
-        <article class="stat-card">
+        <a class="stat-card" href="contacts.html">
           <div class="stat-top"><div class="stat-icon">👥</div></div>
-          <div class="stat-number">4</div>
+          <div class="stat-number" id="statContacts">–</div>
           <div class="stat-label">Trusted Contacts</div>
-        </article>
-        <article class="stat-card">
+        </a>
+        <a class="stat-card" href="map.html">
+          <div class="stat-top"><div class="stat-icon">🛡️</div></div>
+          <div class="stat-number" id="statSafety">–</div>
+          <div class="stat-label" id="statSafetyLabel">Area safety score</div>
+        </a>
+        <a class="stat-card" href="history.html">
           <div class="stat-top"><div class="stat-icon">📋</div></div>
-          <div class="stat-number">12</div>
-          <div class="stat-label">Alert Logs</div>
-        </article>
-        <article class="stat-card">
-          <div class="stat-top"><div class="stat-icon">✅</div></div>
-          <div class="stat-number">98%</div>
-          <div class="stat-label">Delivery Rate</div>
-        </article>
-        <article class="stat-card">
-          <div class="stat-top"><div class="stat-icon">⚡</div></div>
-          <div class="stat-number">3.2s</div>
-          <div class="stat-label">Avg Response</div>
-        </article>
+          <div class="stat-number" id="statAlerts">–</div>
+          <div class="stat-label">SOS Alerts Sent</div>
+        </a>
+        <a class="stat-card" href="profile.html#channels">
+          <div class="stat-top"><div class="stat-icon">📡</div></div>
+          <div class="stat-number" id="statChannels">–</div>
+          <div class="stat-label">Alert channels on (email, SMS)</div>
+        </a>
       </section>
 
       <section class="two-col">
         <div class="card">
           <div class="card-head">
+            <h3>Safety Readiness</h3>
+            <strong class="readiness-score" id="readinessScore">–</strong>
+          </div>
+          <div class="progress"><div id="readinessBar"></div></div>
+          <div class="check-list" id="readinessList"></div>
+        </div>
+
+        <a class="card map-teaser" href="map.html">
+          <div class="map-teaser-art" aria-hidden="true"></div>
+          <div>
+            <h3>Safety Map</h3>
+            <p class="muted">See reported unsafe spots, find the nearest police station or hospital, and plan the safest walking route.</p>
+            <span class="text-btn">Open map →</span>
+          </div>
+        </a>
+      </section>
+
+      <section class="two-col" style="margin-top:22px">
+        <div class="card">
+          <div class="card-head">
             <h3>Trusted Contacts</h3>
             <a class="text-btn" href="contacts.html">Manage →</a>
           </div>
-
-          <!-- Dynamic trusted contacts will load here -->
-          <div id="dashboardContactsContainer"></div>
+          <div id="dashboardContactsContainer"><p class="muted">Loading…</p></div>
         </div>
 
         <div class="card">
@@ -105,10 +96,7 @@
             <h3>Recent Activity</h3>
             <a class="text-btn" href="history.html">View All →</a>
           </div>
-          <div class="activity-row"><div class="activity-dot"></div><div class="activity-body"><p>Safe check-in confirmed at Anna Nagar</p><small>Today, 8:45 PM</small></div></div>
-          <div class="activity-row"><div class="activity-dot"></div><div class="activity-body"><p>Location shared with Mother for two hours</p><small>Today, 6:30 PM</small></div></div>
-          <div class="activity-row"><div class="activity-dot"></div><div class="activity-body"><p>SOS test alert sent and cancelled within 10 seconds</p><small>Yesterday, 11:20 AM</small></div></div>
-          <div class="activity-row"><div class="activity-dot"></div><div class="activity-body"><p>Profile security settings updated</p><small>Mar 7, 9:00 AM</small></div></div>
+          <div id="recentActivity"><p class="muted">Loading…</p></div>
         </div>
       </section>
 
@@ -116,21 +104,7 @@
   </main>
 </div>
 
-<div class="alert-overlay" id="alertOverlay">
-  <div style="font-size:72px">🚨</div>
-  <h2>Alert Sent</h2>
-  <p>Your live location has been prepared for emergency escalation.</p>
-  <div class="count-box">
-    <div class="count-num" id="countNum">10</div>
-    <div>Tap cancel to stop the emergency alert before full escalation.</div>
-  </div>
-  <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap">
-    <button class="btn btn-outline" onclick="cancelAlert()">Cancel Alert</button>
-    <button class="btn btn-soft">Layer 1 Active</button>
-  </div>
-</div>
-
-<div class="toast" id="toast">Action completed</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="js/app.js"></script>
 </body>
 </html>

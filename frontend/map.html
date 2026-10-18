@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#e65278" />
+  <title>Safety Map — SheShield</title>
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="map">
+
+<div class="app">
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title">
+        <h1>Safety Map</h1>
+        <p>Community-reported unsafe spots, nearby help and the safest route</p>
+      </div>
+      <div class="top-actions">
+        <div class="pill" id="locationPill">📍 Locating…</div>
+      </div>
+    </div>
+
+    <div class="map-layout">
+      <section class="map-panel">
+
+        <div class="card score-card">
+          <div class="score-ring" id="scoreRing"><span id="scoreValue">–</span></div>
+          <div>
+            <strong id="scoreLabel">Checking your area…</strong>
+            <p class="muted small" id="scoreSub">Based on community reports within 500 m</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="panel-title">🧭 Safest route</h3>
+          <form class="route-form" onsubmit="searchDestination(event)">
+            <input id="destInput" placeholder="Where are you going?" autocomplete="off" aria-label="Destination">
+            <button class="btn btn-primary btn-sm" type="submit">Go</button>
+          </form>
+          <div class="segmented" role="radiogroup" aria-label="Travel mode">
+            <label><input type="radio" name="mode" value="foot" checked><span>🚶 Walk</span></label>
+            <label><input type="radio" name="mode" value="car"><span>🚗 Drive</span></label>
+          </div>
+          <div id="destResults" class="dest-results"></div>
+          <div id="routeResults" class="route-results"></div>
+        </div>
+
+        <div class="card">
+          <h3 class="panel-title">Layers</h3>
+          <label class="layer-toggle"><input type="checkbox" id="layerReports" checked> <span class="dot dot-red"></span> Unsafe spot reports</label>
+          <label class="layer-toggle"><input type="checkbox" id="layerHeat"> <span class="dot dot-heat"></span> Danger heatmap</label>
+          <label class="layer-toggle"><input type="checkbox" id="layerPolice" checked> <span class="poi-mini">🚓</span> Police stations</label>
+          <label class="layer-toggle"><input type="checkbox" id="layerHospital" checked> <span class="poi-mini">🏥</span> Hospitals</label>
+          <p class="muted small" id="poiStatus"></p>
+        </div>
+
+        <div class="map-panel-actions">
+          <button class="btn btn-primary btn-block" onclick="startReportMode()">⚠️ Report unsafe spot</button>
+          <button class="btn btn-outline btn-block" onclick="routeToNearest('police')">🚓 Route to nearest police</button>
+          <button class="btn btn-outline btn-block" onclick="routeToNearest('hospital')">🏥 Route to nearest hospital</button>
+        </div>
+
+        <div class="legend">
+          <span><i style="background:#f59e0b"></i>Low</span>
+          <span><i style="background:#f97316"></i>Medium</span>
+          <span><i style="background:#dc2626"></i>High severity</span>
+        </div>
+      </section>
+
+      <section class="map-stage">
+        <div id="map" aria-label="Safety map"></div>
+        <div class="map-hint" id="mapHint" hidden>Tap the map where it happened · <button onclick="cancelReportMode()">Cancel</button></div>
+        <button class="map-fab" onclick="recenter()" title="Center on my location" aria-label="Center on my location">◎</button>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="reportModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+    <div class="modal-head">
+      <h2 class="serif" id="reportTitle">Report an unsafe spot</h2>
+      <button class="icon-btn" onclick="closeModal('reportModal')" aria-label="Close">✕</button>
+    </div>
+    <p class="muted small" style="margin-bottom:16px">Reports are anonymous: other users never see who submitted them. They help everyone nearby choose safer routes.</p>
+    <form class="form-grid" onsubmit="submitReport(event)">
+      <div class="field">
+        <label for="reportCategory">What happened?</label>
+        <select id="reportCategory" required>
+          <option value="harassment">🗣️ Harassment / catcalling</option>
+          <option value="stalking">👣 Followed / stalking</option>
+          <option value="poor_lighting">💡 Poor lighting</option>
+          <option value="deserted">🌫️ Deserted / isolated area</option>
+          <option value="unsafe_transport">🚌 Unsafe public transport</option>
+          <option value="theft">👜 Theft / snatching</option>
+          <option value="assault">⚠️ Assault</option>
+          <option value="other">📍 Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>How serious?</label>
+        <div class="segmented">
+          <label><input type="radio" name="severity" value="1"><span>Low</span></label>
+          <label><input type="radio" name="severity" value="2" checked><span>Medium</span></label>
+          <label><input type="radio" name="severity" value="3"><span>High</span></label>
+        </div>
+      </div>
+      <div class="field">
+        <label for="reportWhen">When?</label>
+        <input id="reportWhen" type="datetime-local">
+      </div>
+      <div class="field">
+        <label for="reportDesc">Details <span class="muted">(optional)</span></label>
+        <textarea id="reportDesc" maxlength="400" placeholder="E.g. no street lights after 8 PM, group loitering near the bus stop"></textarea>
+      </div>
+      <p class="muted small" id="reportLocation"></p>
+      <button class="btn btn-primary btn-block" type="submit">Submit report</button>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"
+        integrity="sha384-mFKkGiGvT5vo1fEyGCD3hshDdKmW3wzXW/x+fWriYJArD0R3gawT6lMvLboM22c0" crossorigin="anonymous"></script>
+<script src="js/map.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -3,25 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Signup — SheShield</title>
+  <meta name="theme-color" content="#e65278" />
+  <title>Sign Up — SheShield</title>
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
+<body data-page="signup">
 
 <div class="auth-shell">
   <section class="auth-panel auth-side">
     <div class="auth-side-card">
-      <div class="logo">She<span>Shield</span></div>
-      <div class="shield">♀</div>
+      <a class="logo" href="index.html">She<span>Shield</span></a>
+      <div class="shield"><img src="img/logo.svg" alt="" width="72" height="72"></div>
       <h2>Your safety,<br>reimagined</h2>
-      <p>Create a protected account and build your trusted emergency network in minutes.</p>
+      <p>Create your account and build your trusted emergency network in minutes.</p>
       <div class="points">
         <div class="point">Priority-based trusted contacts</div>
         <div class="point">Layered emergency escalation</div>
-        <div class="point">Research-grade safety workflow</div>
+        <div class="point">Live tracking link for your contacts</div>
       </div>
     </div>
   </section>
@@ -29,47 +31,47 @@
   <section class="auth-panel">
     <form class="form-wrap" onsubmit="handleSignup(event)">
       <h1>Create Account</h1>
-      <p class="form-sub">Register your profile and add your first emergency contact</p>
+      <p class="form-sub">Register and add your first emergency contact</p>
 
       <div class="form-grid">
         <div class="form-row">
           <div class="field">
-            <label>First Name</label>
+            <label for="firstName">First Name</label>
             <div class="input-wrap">
               <span>👤</span>
-              <input id="firstName" type="text" placeholder="First name" required>
+              <input id="firstName" type="text" placeholder="First name" autocomplete="given-name" required>
             </div>
           </div>
           <div class="field">
-            <label>Last Name</label>
+            <label for="lastName">Last Name</label>
             <div class="input-wrap">
               <span>👤</span>
-              <input id="lastName" type="text" placeholder="Last name" required>
+              <input id="lastName" type="text" placeholder="Last name" autocomplete="family-name" required>
             </div>
           </div>
         </div>
 
         <div class="field">
-          <label>Email Address</label>
+          <label for="email">Email Address</label>
           <div class="input-wrap">
             <span>✉️</span>
-            <input id="email" type="email" placeholder="email id" required>
+            <input id="email" type="email" placeholder="you@example.com" autocomplete="email" required>
           </div>
         </div>
 
         <div class="field">
-          <label>Phone Number</label>
+          <label for="phone">Phone Number</label>
           <div class="input-wrap">
             <span>📱</span>
-            <input id="phone" type="tel" placeholder="Contanct Number" required>
+            <input id="phone" type="tel" placeholder="+91 98765 43210" autocomplete="tel" required>
           </div>
         </div>
 
         <div class="field">
-          <label>Password</label>
+          <label for="signup-pass">Password</label>
           <div class="input-wrap">
             <span>🔒</span>
-            <input id="signup-pass" type="password" oninput="updateStrength(this.value)" placeholder="Create strong password" required>
+            <input id="signup-pass" type="password" oninput="updateStrength(this.value)" placeholder="At least 8 characters" minlength="8" autocomplete="new-password" required>
           </div>
           <div class="password-meter">
             <i id="sb1"></i><i id="sb2"></i><i id="sb3"></i><i id="sb4"></i>
@@ -77,10 +79,10 @@
         </div>
 
         <div class="field">
-          <label>Quick Emergency Contact</label>
+          <label for="quickContact">Quick Emergency Contact <span class="muted">(optional)</span></label>
           <div class="input-wrap">
             <span>🆘</span>
-            <input id="quickContact" type="tel" placeholder="Emergency Contanct number">
+            <input id="quickContact" type="tel" placeholder="Emergency contact's phone number">
           </div>
         </div>
 
@@ -94,7 +96,7 @@
   </section>
 </div>
 
-<div class="toast" id="toast">Action completed</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="js/app.js"></script>
 </body>
 </html>

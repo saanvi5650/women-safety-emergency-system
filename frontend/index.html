@@ -3,18 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#e65278" />
+  <meta name="description" content="SheShield: one-tap SOS with live location tracking, layered alerts to trusted contacts, and a community safety map with safest routes." />
   <title>SheShield — Adaptive Safety Platform</title>
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
-  
 </head>
-<body>
+<body data-page="landing">
 
 <header class="navbar">
   <div class="container nav-inner">
-    <div class="logo">She<span>Shield</span></div>
+    <a class="logo" href="index.html"><img src="img/logo.svg" alt="" width="30" height="30" class="logo-mark">She<span>Shield</span></a>
     <div class="nav-actions">
       <a class="btn btn-outline" href="login.html">Sign In</a>
       <a class="btn btn-primary" href="signup.html">Get Protected</a>
@@ -28,20 +30,23 @@
       <div class="badge">Always protected · Always connected</div>
       <h1>Safety that <span class="accent">never sleeps</span></h1>
       <p>
-        SheShield is a professional women safety platform built around an adaptive multi-layer emergency
-        response model. It combines live location sharing, trusted contact escalation, emergency history,
-        and intelligent SOS workflows in one clean system.
+        SheShield alerts the people you trust the moment you need help, sends them a live tracking link,
+        and keeps escalating until someone responds. Its community safety map shows unsafe spots and
+        finds the safest way home.
       </p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="signup.html">Create Account</a>
-        <a class="btn btn-outline" href="login.html">Sign In</a>
+        <a class="btn btn-primary" href="signup.html">Create Free Account</a>
+        <a class="btn btn-outline" href="#how">How it works</a>
+      </div>
+      <div class="hero-trust">
+        <span>✓ Works in any browser</span><span>✓ No SMS app needed</span><span>✓ Free maps, no API keys</span>
       </div>
     </div>
 
     <div class="hero-visual">
       <div class="visual-card">
         <div class="visual-top">
-          <strong>Emergency Overview</strong>
+          <strong>Live Emergency View</strong>
           <span class="badge">AMERM Active</span>
         </div>
         <div class="radar"></div>
@@ -49,40 +54,78 @@
       <div class="visual-card">
         <div class="visual-top">
           <strong>Trusted Layers</strong>
-          <small>Priority contacts are notified progressively</small>
+          <small>Escalates until someone responds</small>
         </div>
-        <p style="color:var(--text-soft);line-height:1.8">
-          Layer 1 alerts primary guardians instantly. If no response is detected, the system escalates
-          automatically across higher contact priorities with full location context.
-        </p>
+        <div class="mini-layers">
+          <div><b>1</b> Mother, Father <code>0s</code></div>
+          <div><b>2</b> Best friend <code>60s</code></div>
+          <div><b>3</b> Roommates <code>120s</code></div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <section class="features">
-  <div class="container feature-grid">
-    <article class="feature">
-      <div class="icon">📍</div>
-      <h3>Live Location Intelligence</h3>
-      <p>Share precise coordinates with family and friends in real time during an emergency.</p>
-    </article>
-    <article class="feature">
-      <div class="icon">🆘</div>
-      <h3>Adaptive Escalation</h3>
-      <p>Move beyond a single SOS button with multi-layer alert escalation and response timing.</p>
-    </article>
-    <article class="feature">
-      <div class="icon">📋</div>
-      <h3>Safety Analytics</h3>
-      <p>Track alert logs, response outcomes, and escalation layers for research and evaluation.</p>
-    </article>
+  <div class="container">
+    <div class="section-head">
+      <h2>Everything you need when it matters</h2>
+      <p>Built after studying bSafe, Noonlight, Life360, Safetipin, Safecity and India's 112 app, and combining what each does best.</p>
+    </div>
+    <div class="feature-grid">
+      <article class="feature">
+        <div class="icon">🚨</div>
+        <h3>Adaptive SOS Escalation</h3>
+        <p>Priority 1 contacts are alerted instantly. If nobody responds, SheShield automatically widens the circle, layer by layer.</p>
+      </article>
+      <article class="feature">
+        <div class="icon">📍</div>
+        <h3>Live Tracking Link</h3>
+        <p>Contacts get a link by email and SMS showing your real-time location, with a one-tap “I'm responding” button.</p>
+      </article>
+      <article class="feature">
+        <div class="icon">🗺️</div>
+        <h3>Community Safety Map</h3>
+        <p>See crowdsourced reports of harassment, poor lighting and deserted stretches, weighted by time of day.</p>
+      </article>
+      <article class="feature">
+        <div class="icon">🧭</div>
+        <h3>Safest Route Home</h3>
+        <p>Compare walking routes by how many unsafe reports lie along each one, not just by distance.</p>
+      </article>
+      <article class="feature">
+        <div class="icon">🏥</div>
+        <h3>Nearby Help</h3>
+        <p>Instantly find the closest police stations and hospitals around you, with directions.</p>
+      </article>
+      <article class="feature">
+        <div class="icon">📞</div>
+        <h3>Fake Call &amp; Shake SOS</h3>
+        <p>Get out of uncomfortable situations with a realistic fake call, or shake your phone to start an SOS.</p>
+      </article>
+    </div>
   </div>
 </section>
 
-<div class="footer-note">SheShield frontend prototype for research implementation</div>
+<section class="how" id="how">
+  <div class="container">
+    <div class="section-head">
+      <h2>How it works</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><span>1</span><h3>Add trusted contacts</h3><p>Choose who is alerted first, second and third.</p></div>
+      <div class="step"><span>2</span><h3>Press SOS</h3><p>A short countdown lets you cancel accidental presses.</p></div>
+      <div class="step"><span>3</span><h3>Contacts are alerted</h3><p>Email and SMS with your live location and medical notes.</p></div>
+      <div class="step"><span>4</span><h3>Help responds</h3><p>Escalation stops once someone taps “I'm responding”.</p></div>
+    </div>
+  </div>
+</section>
 
-<div class="toast" id="toast">Action completed</div>
+<footer class="footer-note">
+  SheShield · In immediate danger, always call <a href="tel:112"><strong>112</strong></a> · Women helpline <a href="tel:1091"><strong>1091</strong></a>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="js/app.js"></script>
 </body>
 </html>

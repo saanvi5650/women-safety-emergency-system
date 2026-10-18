@@ -3,25 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#e65278" />
   <title>Login — SheShield</title>
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
+<body data-page="login">
 
 <div class="auth-shell">
   <section class="auth-panel auth-side">
     <div class="auth-side-card">
-      <div class="logo">She<span>Shield</span></div>
-      <div class="shield">🛡️</div>
+      <a class="logo" href="index.html">She<span>Shield</span></a>
+      <div class="shield"><img src="img/logo.svg" alt="" width="72" height="72"></div>
       <h2>Welcome back,<br>stay safe</h2>
-      <p>Access your safety dashboard, SOS controls, trusted network, and emergency records.</p>
+      <p>Access your safety dashboard, SOS controls, safety map and trusted network.</p>
       <div class="points">
-        <div class="point">Real-time live safety status</div>
-        <div class="point">Trusted contact escalation model</div>
-        <div class="point">Emergency history and layered logs</div>
+        <div class="point">🚨 One-tap SOS with live location tracking</div>
+        <div class="point">🗺️ Community safety map &amp; safest routes</div>
+        <div class="point">👥 Layered alerts to people you trust</div>
       </div>
     </div>
   </section>
@@ -29,22 +31,22 @@
   <section class="auth-panel">
     <form class="form-wrap" onsubmit="handleLogin(event)">
       <h1>Sign In</h1>
-      <p class="form-sub">Login using your registered email or phone number</p>
+      <p class="form-sub">Log in with your registered email or phone number</p>
 
       <div class="form-grid">
         <div class="field">
-          <label>Email or Phone</label>
+          <label for="loginEmailOrPhone">Email or Phone</label>
           <div class="input-wrap">
             <span>✉️</span>
-            <input id="loginEmailOrPhone" type="text" placeholder="priya@example.com" required>
+            <input id="loginEmailOrPhone" type="text" placeholder="you@example.com" autocomplete="username" required>
           </div>
         </div>
 
         <div class="field">
-          <label>Password</label>
+          <label for="loginPassword">Password</label>
           <div class="input-wrap">
             <span>🔒</span>
-            <input id="loginPassword" type="password" placeholder="Enter your password" required>
+            <input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password" required>
           </div>
         </div>
 
@@ -58,7 +60,7 @@
   </section>
 </div>
 
-<div class="toast" id="toast">Action completed</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="js/app.js"></script>
 </body>
 </html>

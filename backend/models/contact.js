@@ -6,11 +6,13 @@ const contactSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
     },
     name: {
       type: String,
       required: true,
       trim: true,
+      maxlength: 80,
     },
     relationship: {
       type: String,
@@ -26,6 +28,8 @@ const contactSchema = new mongoose.Schema(
       type: String,
       default: "",
       trim: true,
+      lowercase: true,
+      match: [/^$|^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address"],
     },
     priority: {
       type: Number,

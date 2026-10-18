@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#c81c41" />
+  <meta name="robots" content="noindex" />
+  <title>Live SOS Tracking — SheShield</title>
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="track" class="track-page">
+
+<header class="track-header" id="trackHeader">
+  <a class="logo logo-light" href="index.html">She<span>Shield</span></a>
+  <span class="track-live" id="trackLive">● LIVE</span>
+</header>
+
+<main class="track-main">
+  <section class="track-status" id="trackStatus">
+    <h1 id="trackTitle">Loading alert…</h1>
+    <p id="trackSub"></p>
+  </section>
+
+  <div class="track-grid">
+    <div class="track-map-wrap">
+      <div id="trackMap"></div>
+      <div class="track-updated" id="trackUpdated"></div>
+    </div>
+
+    <aside class="track-side">
+      <div class="card" id="ackCard" hidden>
+        <h3>Can you help?</h3>
+        <p class="muted small">Let them and their other contacts know you're on it. This stops further escalation.</p>
+        <button class="btn btn-primary btn-block" id="ackBtn" onclick="acknowledge()">💗 I'm responding</button>
+      </div>
+
+      <div class="card">
+        <div class="track-actions">
+          <a class="btn btn-primary btn-block" id="callPerson" href="#">📞 Call</a>
+          <a class="btn btn-dark btn-block" href="tel:112">🚓 Call 112 (Emergency)</a>
+          <a class="btn btn-outline btn-block" id="openMaps" href="#" target="_blank" rel="noopener">🧭 Directions in Google Maps</a>
+        </div>
+      </div>
+
+      <div class="card" id="medicalCard" hidden>
+        <h3>Medical notes</h3>
+        <p id="medicalNotes"></p>
+      </div>
+
+      <p class="muted small track-note">
+        This page updates automatically every few seconds. If you believe they are in immediate danger, call 112 and share this location.
+      </p>
+    </aside>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<script src="js/app.js"></script>
+<script src="js/track.js"></script>
+</body>
+</html>
