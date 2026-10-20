@@ -1,3 +1,8 @@
+// Local development talks to the backend on port 5000; on Vercel the API is on the same domain
+const API_URL = ["localhost", "127.0.0.1", ""].includes(window.location.hostname)
+  ? "http://localhost:5000"
+  : "";
+
 const $ = (s) => document.querySelector(s);
 
 function showToast(msg) {
@@ -109,7 +114,7 @@ async function handleSignup(event) {
   }
 
   try {
-    const response = await fetch("http://localhost:5000/api/auth/signup", {
+    const response = await fetch(`${API_URL}/api/auth/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -160,7 +165,7 @@ async function addContact(event) {
   }
 
   try {
-    const response = await fetch("http://localhost:5000/api/contacts/add", {
+    const response = await fetch(`${API_URL}/api/contacts/add`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -198,7 +203,7 @@ async function loadContacts() {
   if (!user || !container) return;
 
   try {
-    const response = await fetch(`http://localhost:5000/api/contacts/${user.id}`);
+    const response = await fetch(`${API_URL}/api/contacts/${user.id}`);
     const contacts = await response.json();
 
     container.innerHTML = "";
@@ -256,7 +261,7 @@ async function loadDashboardContacts() {
   if (!user || !container) return;
 
   try {
-    const response = await fetch(`http://localhost:5000/api/contacts/${user.id}`);
+    const response = await fetch(`${API_URL}/api/contacts/${user.id}`);
     const contacts = await response.json();
 
     container.innerHTML = "";
@@ -300,7 +305,7 @@ async function handleLogin(event) {
   }
 
   try {
-    const response = await fetch("http://localhost:5000/api/auth/login", {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
